@@ -121,22 +121,47 @@ st.markdown("""
     margin: 8px 0 8px 60px;
 }
 .user-bubble {
-    background: #e8eef8;
+    background: #DDE6FF;
     border-radius: 18px 18px 4px 18px;
     padding: 10px 16px;
     max-width: 78%;
     font-size: 0.95rem;
     line-height: 1.55;
-    color: #1a1a1a;
+    color: #1E2048;
     white-space: pre-wrap;
     word-break: break-word;
+    box-shadow: 0 1px 4px rgba(91,138,248,0.12);
 }
-/* Sidebar session buttons — tighten spacing */
+
+/* Sidebar session buttons — compact + left-aligned text */
 section[data-testid="stSidebar"] .stButton button {
     text-align: left;
     justify-content: flex-start;
     font-size: 0.85rem;
     padding: 6px 12px;
+}
+
+/* Active session button — blue-tinted highlight */
+section[data-testid="stSidebar"] .stButton [data-testid="baseButton-primary"] {
+    background-color: #DDE6FF !important;
+    color: #1E2048 !important;
+    border-left: 3px solid #5B8AF8 !important;
+    font-weight: 600;
+}
+
+/* Caption / secondary text — muted blue-gray */
+.stCaption, [data-testid="stCaptionContainer"] p {
+    color: #6B7AB8 !important;
+}
+
+/* Tab strip — active tab blue */
+button[data-baseweb="tab"] {
+    font-weight: 500;
+    color: #6B7AB8;
+}
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: #5B8AF8 !important;
+    font-weight: 600;
 }
 </style>
 """, unsafe_allow_html=True)
