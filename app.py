@@ -4,6 +4,22 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 
+
+def _extract_text(content) -> str:
+    """Normalize LangChain chunk.content to str.
+
+    Gemini streaming can return content as a list of dicts like
+    [{'type': 'text', 'text': '...'}] instead of a plain string.
+    """
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return "".join(
+            part.get("text", "") if isinstance(part, dict) else str(part)
+            for part in content
+        )
+    return str(content) if content else ""
+
 load_dotenv()
 
 from llm import AVAILABLE_MODELS, GEMINI_MODEL, get_llm
@@ -211,13 +227,14 @@ if prompt:
                             )
                     final_msgs = history + [ai_msg] + tool_results
                     final = llm.invoke(final_msgs)
-                    full_response = final.content
+                    full_response = _extract_text(final.content)
                     response_box.markdown(full_response)
                 else:
                     # Stream directly
                     for chunk in llm_with_tools.stream(history):
-                        if hasattr(chunk, "content") and chunk.content:
-                            full_response += chunk.content
+                        text = _extract_text(getattr(chunk, "content", ""))
+                        if text:
+                            full_response += text
                             response_box.markdown(full_response + "▌")
                     response_box.markdown(full_response)
 
