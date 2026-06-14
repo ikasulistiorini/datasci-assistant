@@ -2,25 +2,25 @@ import os
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 
-GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_MODEL = "gemini-2.0-flash"
 LLAMA_MODEL = "llama-3.1-8b-instant"
 
-AVAILABLE_MODELS = [GEMINI_MODEL, LLAMA_MODEL]
+AVAILABLE_MODELS = [
+    "gemini-2.0-flash",       # free tier: 1500 req/day ← default
+    "gemini-1.5-flash",       # free tier: 1500 req/day (fallback)
+    "gemini-2.5-flash",       # free tier: 20 req/day (gunakan hemat)
+    LLAMA_MODEL,              # open-source via Groq
+]
+
+
+def is_gemini_model(model_name: str) -> bool:
+    return model_name.startswith("gemini")
 
 
 def get_llm(model_name: str, streaming: bool = True):
-    """Return a configured LangChain chat model.
-
-    Args:
-        model_name: One of AVAILABLE_MODELS.
-        streaming: Enable streaming (both models support it).
-
-    Returns:
-        A LangChain BaseChatModel instance.
-    """
-    if model_name == GEMINI_MODEL:
+    if is_gemini_model(model_name):
         return ChatGoogleGenerativeAI(
-            model=GEMINI_MODEL,
+            model=model_name,
             google_api_key=os.getenv("GOOGLE_API_KEY"),
             streaming=streaming,
             temperature=0.7,

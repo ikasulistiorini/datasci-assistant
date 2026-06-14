@@ -22,7 +22,7 @@ def _extract_text(content) -> str:
 
 load_dotenv()
 
-from llm import AVAILABLE_MODELS, GEMINI_MODEL, get_llm
+from llm import AVAILABLE_MODELS, GEMINI_MODEL, get_llm, is_gemini_model
 from rag import (
     build_rag_chain,
     build_vectorstore,
@@ -131,7 +131,7 @@ st.title("DataSci Assistant")
 mode_tags = []
 if has_vectorstore():
     mode_tags.append("📄 RAG active")
-if selected_model == GEMINI_MODEL:
+if is_gemini_model(selected_model):
     mode_tags.append("👁️ vision")
     mode_tags.append("🔧 function calling")
 st.caption(
@@ -146,7 +146,7 @@ for msg in st.session_state["messages"]:
 
 # ── Image uploader (Gemini only) ──────────────────────────────────────────────
 uploaded_image = None
-if selected_model == GEMINI_MODEL:
+if is_gemini_model(selected_model):
     uploaded_image = st.file_uploader(
         "Upload image for analysis (optional — Gemini only)",
         type=["png", "jpg", "jpeg", "gif", "webp"],
@@ -169,7 +169,7 @@ if prompt:
 
         try:
             # ── Mode 1: Multimodal vision ─────────────────────────────────────
-            if uploaded_image and selected_model == GEMINI_MODEL:
+            if uploaded_image and is_gemini_model(selected_model):
                 from google import genai as google_genai
                 from google.genai import types
                 import PIL.Image
@@ -202,7 +202,7 @@ if prompt:
                 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 
                 llm = get_llm(selected_model)
-                llm_with_tools = llm.bind_tools(TOOLS) if selected_model == GEMINI_MODEL else llm
+                llm_with_tools = llm.bind_tools(TOOLS) if is_gemini_model(selected_model) else llm
 
                 # Build message history
                 history = [SystemMessage(content=system_prompt)]
@@ -239,7 +239,19 @@ if prompt:
                     response_box.markdown(full_response)
 
         except Exception as e:
-            full_response = f"**Error:** {e}"
-            response_box.error(full_response)
+            err_str = str(e)
+            if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower():
+                full_response = (
+                    "**Rate limit hit.** The selected model has reached its free-tier daily quota.\n\n"
+                    "**Options:**\n"
+                    "- Switch to **gemini-2.0-flash** (1500 req/day free) in the sidebar\n"
+                    "- Switch to **llama-3.1-8b-instant** (Groq, very generous free tier)\n"
+                    "- Wait until tomorrow for the quota to reset\n"
+                    "- Add billing at [aistudio.google.com](https://aistudio.google.com) for unlimited usage"
+                )
+                response_box.warning(full_response)
+            else:
+                full_response = f"**Error:** {e}"
+                response_box.error(full_response)
 
     st.session_state["messages"].append({"role": "assistant", "content": full_response})

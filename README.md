@@ -6,7 +6,7 @@ Chatbot berbasis LLM untuk Data Scientist — dibangun sebagai proyek akhir trai
 
 | Fitur | Deskripsi |
 |---|---|
-| Multi-LLM | Gemini 2.5 Flash (default) atau Llama 3.1 8B via Groq — bisa dipilih di sidebar |
+| Multi-LLM | Gemini 2.0 Flash (default, 1500 req/day free) atau Llama 3.1 8B via Groq — bisa dipilih di sidebar |
 | RAG | Upload PDF → index ke ChromaDB → tanya jawab dokumen dengan citation |
 | Vision | Upload gambar/chart untuk analisis via Gemini vision |
 | Function Calling | Tool `get_current_datetime` dan `explain_ml_metric` otomatis dipanggil Gemini |
